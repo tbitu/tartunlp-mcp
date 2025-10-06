@@ -33,7 +33,7 @@ Add to your MCP configuration:
 
 ## Supported Languages
 
-The server supports **700+ translation pairs** as provided by TartuNLP's API. Based on the actual API response, the supported language pairs are:
+The server supports **700 translation pairs** as provided by TartuNLP's API. Based on the actual API response, the supported language pairs are:
 
 ### Core European Languages with Full Coverage
 - **English (eng)** ↔ Estonian, German, Lithuanian, Latvian, Finnish, Russian, Ukrainian + all minority languages
