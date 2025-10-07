@@ -76,24 +76,7 @@ class TartuNLPClient:
                 logger.error(f"Translation request failed: {e}")
                 raise
     
-    async def detect_language(self, text: str) -> Dict[str, Any]:
-        """Áicca sisačálihuvvon teavstta giela."""
-        async with httpx.AsyncClient(timeout=self.timeout) as client:
-            url = f"{self.base_url}"
-            
-            payload = {"text": text}
-            
-            try:
-                response = await client.post(
-                    url,
-                    json=payload,
-                    headers={"Content-Type": "application/json"}
-                )
-                response.raise_for_status()
-                return response.json()
-            except httpx.HTTPError as e:
-                logger.error(f"Language detection failed: {e}")
-                raise
+
     
     async def get_supported_languages(self) -> Dict[str, Any]:
         """Hága dorjojuvvon giellabáraid TartoNLP API:s."""
@@ -150,20 +133,7 @@ async def handle_list_tools() -> List[Tool]:
                 "required": ["text", "source_lang", "target_lang"]
             }
         ),
-        Tool(
-            name="detect_language",
-            description="Fuobmá sisačálihuvvon teavstta giela TartuNLP bokte",
-            inputSchema={
-                "type": "object",
-                "properties": {
-                    "text": {
-                        "type": "string",
-                        "description": "Teaksta maid analyseret vai gávdnat giela"
-                    }
-                },
-                "required": ["text"]
-            }
-        ),
+
         Tool(
             name="get_supported_languages",
             description="Gávnna listtu doarjojuvvon giellabárain ja gávnna gielaid",
@@ -200,23 +170,7 @@ async def call_tool(name: str, arguments: dict | None) -> list[TextContent]:
                 text=json.dumps(result, indent=2, ensure_ascii=False)
             )]
             
-        elif name == "detect_language":
-            args = arguments or {}
-            text = args.get("text", "")
-            
-            if not text:
-                return [TextContent(
-                    type="text", 
-                    text="Error: text is required"
-                )]
-            
-            result = await tartunlp_client.detect_language(text)
-            
-            return [TextContent(
-                type="text",
-                text=json.dumps(result, indent=2, ensure_ascii=False)
-            )]
-            
+
         elif name == "get_supported_languages":
             result = await tartunlp_client.get_supported_languages()
             

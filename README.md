@@ -5,7 +5,6 @@ An MCP server that provides access to TartuNLP translation services from the Uni
 ## Features
 
 - Text translation between supported language pairs
-- Language detection
 - Support for multiple TartuNLP translation models
 - Batch translation capabilities
 
@@ -95,5 +94,4 @@ All 20 minority/indigenous languages form a complete translation matrix with eac
 ## Tools
 
 - `translate_text`: Translate text between supported languages
-- `detect_language`: Detect the language of input text
 - `get_supported_languages`: List all supported language pairs
