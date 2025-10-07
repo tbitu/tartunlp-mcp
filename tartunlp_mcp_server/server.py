@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-TartoNLP MCP Server fállá jorgalanbálvalusaid Tarto universitehta TartoNLP APIs bokte.
+TartuNLP MCP Server provides translation services through the University of Tartu's TartuNLP API.
 """
 
 import asyncio
@@ -23,13 +23,13 @@ from mcp.types import (
 from pydantic import BaseModel
 
 
-# Heivet loggendieđuid
+# Configure logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger("tartunlp-mcp-server")
 
 
 class TranslationRequest(BaseModel):
-    """Jorgalan jearaldagaid málle."""
+    """Model for translation requests."""
     text: str
     source_lang: str
     target_lang: str
@@ -37,7 +37,7 @@ class TranslationRequest(BaseModel):
 
 
 class TartuNLPClient:
-    """TartoNLP-jorgalanbálvalusaid klieanta."""
+    """Client for TartuNLP translation services."""
     
     def __init__(self):
         self.base_url = "https://api.tartunlp.ai/translation/v2"
@@ -50,9 +50,9 @@ class TartuNLPClient:
         target_lang: str,
         model: Optional[str] = None
     ) -> Dict[str, Any]:
-        """Jorgalit teavstta TartuNLP API: ain."""
+        """Translate text using the TartuNLP API."""
         async with httpx.AsyncClient(timeout=self.timeout) as client:
-            # TartuNLP API v2 terminologiija jorgaleapmái
+            # Use TartuNLP API v2 endpoint for translation
             url = self.base_url
             
             payload = {
@@ -79,54 +79,54 @@ class TartuNLPClient:
 
     
     async def get_supported_languages(self) -> Dict[str, Any]:
-        """Hága dorjojuvvon giellabáraid TartoNLP API:s."""
+        """Get supported language pairs from the TartuNLP API."""
         async with httpx.AsyncClient(timeout=self.timeout) as client:
             try:
-                # Gávnna API-dieđuid mat galget čájehit doarjojuvvon gielaid
+                # Get API configuration that shows supported languages
                 response = await client.get(self.base_url)
                 response.raise_for_status()
                 return response.json()
             except httpx.HTTPError as e:
                 logger.error(f"Failed to get supported languages: {e}")
-                # Ruovttoluotta vuođđostruktuvrii, jos API-hálaldat meattáhusat
+                # Return fallback structure if API call fails
                 return {
                     "error": f"Could not fetch supported languages: {str(e)}",
                     "message": "Please check TartuNLP API documentation for current language pairs"
                 }
 
 
-# Álggat TartoNLP klieantta
+# Initialize TartuNLP client
 tartunlp_client = TartuNLPClient()
 
-# Ráhkat MCP-bálvá
+# Create MCP server
 server = Server("tartunlp-mcp-server")
 
 
 @server.list_tools()
 async def handle_list_tools() -> List[Tool]:
-    """Čájet listu olamuttus reaidduin."""
+    """Return list of available tools."""
     return [
         Tool(
             name="translate_text",
-            description="Jorgalit teavstta dorjojuvvon gielaid gaskkas TartuNLP bokte",
+            description="Translate text between supported language pairs using TartuNLP",
             inputSchema={
                 "type": "object",
                 "properties": {
                     "text": {
                         "type": "string",
-                        "description": "Teaksta maid jorgalit"
+                        "description": "Text to translate"
                     },
                     "source_lang": {
                         "type": "string", 
-                        "description": "Gáldogiela koda (omd., 'et', 'en', 'ru')"
+                        "description": "Source language code (e.g., 'et', 'en', 'ru')"
                     },
                     "target_lang": {
                         "type": "string",
-                        "description": "Ulbmilgiela koda (omd., 'et', 'en', 'ru')"
+                        "description": "Target language code (e.g., 'et', 'en', 'ru')"
                     },
                     "model": {
                         "type": "string",
-                        "description": "Eavttolaš modealla/domeana spesifikašuvdna",
+                        "description": "Optional model/domain specification",
                         "default": None
                     }
                 },
@@ -136,7 +136,7 @@ async def handle_list_tools() -> List[Tool]:
 
         Tool(
             name="get_supported_languages",
-            description="Gávnna listtu doarjojuvvon giellabárain ja gávnna gielaid",
+            description="Get list of supported language pairs and available languages",
             inputSchema={
                 "type": "object",
                 "properties": {},
@@ -148,7 +148,7 @@ async def handle_list_tools() -> List[Tool]:
 
 @server.call_tool()
 async def call_tool(name: str, arguments: dict | None) -> list[TextContent]:
-    """Reaiddut gohččot."""
+    """Handle tool calls."""
     try:
         if name == "translate_text":
             args = arguments or {}
@@ -194,7 +194,7 @@ async def call_tool(name: str, arguments: dict | None) -> list[TextContent]:
 
 
 async def main():
-    """Server- guossoheaddji váldodoaimmahat."""
+    """Main server entry point."""
     async with stdio_server() as (read_stream, write_stream):
         await server.run(
             read_stream,
