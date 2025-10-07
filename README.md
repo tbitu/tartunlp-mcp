@@ -25,37 +25,27 @@ Add to your MCP configuration file:
 
 ### Cross-Platform Configuration
 
-**Option 1: Using python3 (recommended for Linux/Mac)**
+**Linux/Mac (using python3):**
 ```json
 {
   "mcpServers": {
     "TartuNLP": {
       "command": "python3",
       "args": ["-m", "tartunlp_mcp_server"],
-      "env": {},
-      "disabled": false,
-      "autoApprove": [
-        "translate_text",
-        "get_supported_languages"
-      ]
+      "env": {}
     }
   }
 }
 ```
 
-**Option 2: Using python (Windows/cross-platform)**
+**Windows (using python):**
 ```json
 {
   "mcpServers": {
     "TartuNLP": {
       "command": "python",
       "args": ["-m", "tartunlp_mcp_server"],
-      "env": {},
-      "disabled": false,
-      "autoApprove": [
-        "translate_text",
-        "get_supported_languages"
-      ]
+      "env": {}
     }
   }
 }
@@ -64,7 +54,7 @@ Add to your MCP configuration file:
 ### Configuration Notes
 - Use `python3` on Linux/Mac systems where both Python 2 and 3 are installed
 - Use `python` on Windows or systems where Python 3 is the default
-- The `autoApprove` array allows automatic execution of translation tools without manual approval
+- Additional configuration options like `disabled` and `autoApprove` can be added as needed
 
 ## Supported Languages
 
