@@ -25,7 +25,7 @@ from pydantic import BaseModel
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger("tartunlp-mcp-server")
+logger = logging.getLogger("TartuNLP")
 
 
 class TranslationRequest(BaseModel):
@@ -99,7 +99,7 @@ class TartuNLPClient:
 tartunlp_client = TartuNLPClient()
 
 # Create MCP server
-server = Server("tartunlp-mcp-server")
+server = Server("TartuNLP")
 
 
 @server.list_tools()
@@ -200,7 +200,7 @@ async def main():
             read_stream,
             write_stream,
             InitializationOptions(
-                server_name="tartunlp-mcp-server",
+                server_name="TartuNLP",
                 server_version="0.1.0",
                 capabilities=ServerCapabilities(
                     tools={}
