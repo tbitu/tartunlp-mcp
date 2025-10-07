@@ -10,25 +10,61 @@ An MCP server that provides access to TartuNLP translation services from the Uni
 
 ## Installation
 
+### Prerequisites
+- Python 3.8 or higher
+- pip package manager
+
+### Install the package
 ```bash
 pip install -e .
 ```
 
 ## Usage
 
-Add to your MCP configuration:
+Add to your MCP configuration file:
 
+### Cross-Platform Configuration
+
+**Option 1: Using python3 (recommended for Linux/Mac)**
 ```json
 {
   "mcpServers": {
-    "tartunlp": {
-      "command": "python",
+    "TartuNLP": {
+      "command": "python3",
       "args": ["-m", "tartunlp_mcp_server"],
-      "env": {}
+      "env": {},
+      "disabled": false,
+      "autoApprove": [
+        "translate_text",
+        "get_supported_languages"
+      ]
     }
   }
 }
 ```
+
+**Option 2: Using python (Windows/cross-platform)**
+```json
+{
+  "mcpServers": {
+    "TartuNLP": {
+      "command": "python",
+      "args": ["-m", "tartunlp_mcp_server"],
+      "env": {},
+      "disabled": false,
+      "autoApprove": [
+        "translate_text",
+        "get_supported_languages"
+      ]
+    }
+  }
+}
+```
+
+### Configuration Notes
+- Use `python3` on Linux/Mac systems where both Python 2 and 3 are installed
+- Use `python` on Windows or systems where Python 3 is the default
+- The `autoApprove` array allows automatic execution of translation tools without manual approval
 
 ## Supported Languages
 
