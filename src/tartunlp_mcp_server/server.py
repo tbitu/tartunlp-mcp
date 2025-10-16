@@ -21,7 +21,6 @@ from mcp.types import (
     Tool,
 )
 from pydantic import BaseModel, Field
-from smithery.decorators import smithery
 
 # Configuration schema for Smithery MCP
 class ServerConfig(BaseModel):
@@ -85,8 +84,6 @@ class TartuNLPClient:
                 logger.error(f"Translation request failed: {e}")
                 raise
     
-
-    
     async def get_supported_languages(self) -> Dict[str, Any]:
         """Get supported language pairs from the TartuNLP API."""
         async with httpx.AsyncClient(timeout=self.timeout) as client:
@@ -104,11 +101,11 @@ class TartuNLPClient:
                 }
 
 
-# tartunlp_client will be initialized in main() with config
-tartunlp_client = None
-
 # Create MCP server
 server = Server("TartuNLP")
+
+# tartunlp_client will be initialized when server is created
+tartunlp_client = None
 
 
 @server.list_tools()
@@ -202,18 +199,22 @@ async def call_tool(name: str, arguments: dict | None) -> list[TextContent]:
         )]
 
 
-@smithery.server(config_schema=ServerConfig)
-def create_server(config: ServerConfig = None):
-    """Create and configure the TartuNLP MCP server."""
+def create_server(config: dict = None):
+    """Create and configure the TartuNLP MCP server for Smithery deployment."""
     global tartunlp_client
     
-    # Initialize with config
+    # Parse and validate config
     if config is None:
-        config = ServerConfig()
+        config = {}
     
+    validated_config = ServerConfig(**config)
+    
+    # Initialize the client with the provided config
     tartunlp_client = TartuNLPClient(
-        timeout=config.timeout
+        timeout=validated_config.timeout
     )
+    
+    logger.info(f"TartuNLP MCP server initialized with timeout={validated_config.timeout}ms")
     
     return server
 
