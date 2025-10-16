@@ -9,7 +9,7 @@ description = "MCP server for TartuNLP translation services"
 authors = [{name = "MCP Server", email = "server@example.com"}]
 license = {text = "MIT"}
 readme = "README.md"
-requires-python = ">=3.8"
+requires-python = ">=3.10"
 dependencies = [
     "mcp>=1.0.0",
     "httpx>=0.25.0",
