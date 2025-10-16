@@ -6,7 +6,7 @@ build-backend = "setuptools.build_meta"
 name = "tartunlp-mcp-server"
 version = "0.1.0"
 description = "MCP server for TartuNLP translation services"
-authors = [{name = "MCP Server", email = "server@example.com"}]
+authors = [{name = "tbitu", email = "tarjeib@gmail.com"}]
 license = {text = "MIT"}
 readme = "README.md"
 requires-python = ">=3.10"
