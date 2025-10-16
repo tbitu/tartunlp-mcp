@@ -1,5 +1,7 @@
 # TartuNLP MCP Server
 
+[![smithery badge](https://smithery.ai/badge/@tbitu/tartunlp-mcp)](https://smithery.ai/server/@tbitu/tartunlp-mcp)
+
 An MCP server that provides access to TartuNLP translation services from the University of Tartu.
 
 ## Features
@@ -9,6 +11,14 @@ An MCP server that provides access to TartuNLP translation services from the Uni
 - Batch translation capabilities
 
 ## Installation
+
+### Installing via Smithery
+
+To install TartuNLP MCP Server automatically via [Smithery](https://smithery.ai/server/@tbitu/tartunlp-mcp):
+
+```bash
+npx -y @smithery/cli install @tbitu/tartunlp-mcp
+```
 
 ### Prerequisites
 - Python 3.8 or higher
