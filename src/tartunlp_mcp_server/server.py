@@ -3,24 +3,14 @@
 TartuNLP MCP Server provides translation services through the University of Tartu's TartuNLP API.
 """
 
-import asyncio
 import json
 import logging
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, Optional
 
 import httpx
-from mcp.server import Server
-from mcp.server.models import InitializationOptions
-from mcp.types import ServerCapabilities
-from mcp.server.stdio import stdio_server
-from mcp.types import (
-    CallToolRequest,
-    CallToolResult,
-    ListToolsRequest,
-    TextContent,
-    Tool,
-)
+from mcp.server.fastmcp import Context, FastMCP
 from pydantic import BaseModel, Field
+from smithery.decorators import smithery
 
 # Configuration schema for Smithery MCP
 class ServerConfig(BaseModel):
@@ -35,14 +25,6 @@ class ServerConfig(BaseModel):
 # Configure logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger("TartuNLP")
-
-
-class TranslationRequest(BaseModel):
-    """Model for translation requests."""
-    text: str
-    source_lang: str
-    target_lang: str
-    model: Optional[str] = None
 
 
 class TartuNLPClient:
@@ -60,7 +42,6 @@ class TartuNLPClient:
     ) -> Dict[str, Any]:
         """Translate text using the TartuNLP API."""
         async with httpx.AsyncClient(timeout=self.timeout) as client:
-            # Use TartuNLP API v2 endpoint for translation
             url = self.base_url
             
             payload = {
@@ -88,158 +69,63 @@ class TartuNLPClient:
         """Get supported language pairs from the TartuNLP API."""
         async with httpx.AsyncClient(timeout=self.timeout) as client:
             try:
-                # Get API configuration that shows supported languages
                 response = await client.get(self.base_url)
                 response.raise_for_status()
                 return response.json()
             except httpx.HTTPError as e:
                 logger.error(f"Failed to get supported languages: {e}")
-                # Return fallback structure if API call fails
                 return {
                     "error": f"Could not fetch supported languages: {str(e)}",
                     "message": "Please check TartuNLP API documentation for current language pairs"
                 }
 
 
-# Create MCP server
-server = Server("TartuNLP")
-
-# tartunlp_client will be initialized when server is created
-tartunlp_client = None
-
-
-@server.list_tools()
-async def handle_list_tools() -> List[Tool]:
-    """Return list of available tools."""
-    return [
-        Tool(
-            name="translate_text",
-            description="Translate text between supported language pairs using TartuNLP",
-            inputSchema={
-                "type": "object",
-                "properties": {
-                    "text": {
-                        "type": "string",
-                        "description": "Text to translate"
-                    },
-                    "source_lang": {
-                        "type": "string", 
-                        "description": "Source language code (e.g., 'et', 'en', 'ru')"
-                    },
-                    "target_lang": {
-                        "type": "string",
-                        "description": "Target language code (e.g., 'et', 'en', 'ru')"
-                    },
-                    "model": {
-                        "type": "string",
-                        "description": "Optional model/domain specification",
-                        "default": None
-                    }
-                },
-                "required": ["text", "source_lang", "target_lang"]
-            }
-        ),
-
-        Tool(
-            name="get_supported_languages",
-            description="Get list of supported language pairs and available languages",
-            inputSchema={
-                "type": "object",
-                "properties": {},
-                "required": []
-            }
-        )
-    ]
-
-
-@server.call_tool()
-async def call_tool(name: str, arguments: dict | None) -> list[TextContent]:
-    """Handle tool calls."""
-    try:
-        if name == "translate_text":
-            args = arguments or {}
-            text = args.get("text", "")
-            source_lang = args.get("source_lang", "")
-            target_lang = args.get("target_lang", "")
-            model = args.get("model")
-            
-            if not text or not source_lang or not target_lang:
-                return [TextContent(
-                    type="text",
-                    text="Error: text, source_lang, and target_lang are required"
-                )]
-            
-            result = await tartunlp_client.translate(text, source_lang, target_lang, model)
-            
-            return [TextContent(
-                type="text",
-                text=json.dumps(result, indent=2, ensure_ascii=False)
-            )]
-            
-
-        elif name == "get_supported_languages":
-            result = await tartunlp_client.get_supported_languages()
-            
-            return [TextContent(
-                type="text",
-                text=json.dumps(result, indent=2, ensure_ascii=False)
-            )]
-            
-        else:
-            return [TextContent(
-                type="text",
-                text=f"Error: Unknown tool {name}"
-            )]
-            
-    except Exception as e:
-        logger.error(f"Tool call failed: {e}")
-        return [TextContent(
-            type="text",
-            text=f"Error: {str(e)}"
-        )]
-
-
-def create_server(config: dict = None):
+@smithery.server(config_schema=ServerConfig)
+def create_server(config: ServerConfig = None):
     """Create and configure the TartuNLP MCP server for Smithery deployment."""
-    global tartunlp_client
-    
-    # Parse and validate config
+    # Use default config if none provided
     if config is None:
-        config = {}
-    
-    validated_config = ServerConfig(**config)
+        config = ServerConfig()
     
     # Initialize the client with the provided config
-    tartunlp_client = TartuNLPClient(
-        timeout=validated_config.timeout
-    )
+    client = TartuNLPClient(timeout=config.timeout)
     
-    logger.info(f"TartuNLP MCP server initialized with timeout={validated_config.timeout}ms")
+    logger.info(f"TartuNLP MCP server initialized with timeout={config.timeout}ms")
+    
+    # Create FastMCP server
+    server = FastMCP(name="TartuNLP")
+    
+    @server.tool()
+    async def translate_text(
+        text: str,
+        source_lang: str,
+        target_lang: str,
+        model: Optional[str] = None,
+        ctx: Context = None
+    ) -> str:
+        """Translate text between supported language pairs using TartuNLP.
+        
+        Args:
+            text: Text to translate
+            source_lang: Source language code (e.g., 'et', 'en', 'ru')
+            target_lang: Target language code (e.g., 'et', 'en', 'ru')
+            model: Optional model/domain specification
+        """
+        try:
+            result = await client.translate(text, source_lang, target_lang, model)
+            return json.dumps(result, indent=2, ensure_ascii=False)
+        except Exception as e:
+            logger.error(f"Translation failed: {e}")
+            return json.dumps({"error": str(e)}, indent=2)
+    
+    @server.tool()
+    async def get_supported_languages(ctx: Context = None) -> str:
+        """Get list of supported language pairs and available languages."""
+        try:
+            result = await client.get_supported_languages()
+            return json.dumps(result, indent=2, ensure_ascii=False)
+        except Exception as e:
+            logger.error(f"Failed to get languages: {e}")
+            return json.dumps({"error": str(e)}, indent=2)
     
     return server
-
-
-# For local stdio testing (optional)
-async def main(config: dict = None):
-    """Main server entry point with config validation for stdio mode."""
-    global tartunlp_client
-    validated_config = ServerConfig(**(config or {}))
-    tartunlp_client = TartuNLPClient(
-        timeout=validated_config.timeout
-    )
-    async with stdio_server() as (read_stream, write_stream):
-        await server.run(
-            read_stream,
-            write_stream,
-            InitializationOptions(
-                server_name="TartuNLP",
-                server_version="0.1.0",
-                capabilities=ServerCapabilities(
-                    tools={}
-                ),
-            ),
-        )
-
-
-if __name__ == "__main__":
-    asyncio.run(main())
