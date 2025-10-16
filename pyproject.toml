@@ -14,8 +14,13 @@ dependencies = [
     "mcp>=1.0.0",
     "httpx>=0.25.0",
     "pydantic>=2.0.0",
-    "smithery>=0.1.0"
+    "smithery>=0.4.2"
 ]
 
 [project.scripts]
 tartunlp-mcp-server = "tartunlp_mcp_server:main"
+dev = "smithery.cli.dev:main"
+playground = "smithery.cli.playground:main"
+
+[tool.smithery]
+server = "tartunlp_mcp_server.server:create_server"
