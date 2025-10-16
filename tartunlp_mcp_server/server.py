@@ -20,12 +20,22 @@ from mcp.types import (
     TextContent,
     Tool,
 )
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
+from smithery.decorators import smithery
 
 # Configuration schema for Smithery MCP
 class ServerConfig(BaseModel):
-    api_key: str
-    timeout: int = 5000
+    """Configuration schema for TartuNLP MCP Server."""
+    api_key: str = Field(
+        description="API key for TartuNLP translation services. The TartuNLP API is public and doesn't require authentication, so you can use any value.",
+        default="public"
+    )
+    timeout: int = Field(
+        default=5000,
+        description="Request timeout in milliseconds",
+        ge=1000,
+        le=30000
+    )
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -195,6 +205,12 @@ async def call_tool(name: str, arguments: dict | None) -> list[TextContent]:
             type="text",
             text=f"Error: {str(e)}"
         )]
+
+
+@smithery.server(config_schema=ServerConfig)
+def create_server():
+    """Create and configure the TartuNLP MCP server."""
+    return server
 
 
 async def main(config: dict = None):

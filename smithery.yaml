@@ -5,13 +5,22 @@ startCommand:
   args:
     - "-m"
     - "tartunlp_mcp_server"
+
+profiles:
+  default:
+    config:
+      api_key: "public"
+      timeout: 5000
+
 test:
-  - name: Translate Estonian to English
-    tool: translate_text
-    input:
-      text: "Tere maailm"
-      source_lang: "et"
-      target_lang: "en"
-    expect:
-      type: "text"
-      contains: "Hello world"
+  profile: default
+  tests:
+    - name: Translate Estonian to English
+      tool: translate_text
+      input:
+        text: "Tere maailm"
+        source_lang: "et"
+        target_lang: "en"
+      expect:
+        type: "text"
+        contains: "Hello world"
