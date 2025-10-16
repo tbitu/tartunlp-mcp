@@ -1,31 +1,27 @@
 # TartuNLP MCP Server
 
-An MCP server that provides access to TartuNLP translation services from the University of Tartu.
+[![Docker](https://img.shields.io/badge/docker-ghcr.io-blue)](https://github.com/tbitu/tartunlp-mcp/pkgs/container/tartunlp-mcp)
+[![Python](https://img.shields.io/badge/python-3.8%2B-blue)](https://www.python.org/)
+[![License](https://img.shields.io/badge/license-MIT-green)](LICENSE)
+
+A Model Context Protocol (MCP) server that provides seamless access to [TartuNLP translation services](https://api.tartunlp.ai/) from the University of Tartu. This server enables AI assistants and applications to perform high-quality machine translation across 700+ language pairs, with specialized support for European and Finno-Ugric languages.
 
 ## Features
 
-- Text translation between supported language pairs
-- Support for multiple TartuNLP translation models
-- Batch translation capabilities
+- 🌍 **700+ Language Pairs** - Comprehensive translation coverage including European languages and rare Finno-Ugric languages
+- 🚀 **Docker-First Deployment** - Pre-built Docker images for easy deployment across platforms
+- 🔧 **Simple Integration** - Standard MCP protocol support for seamless integration with AI assistants
+- 🎯 **Specialized Language Support** - Expert translation for Estonian, Finnish, Sami languages, and other minority languages
+- 📦 **Zero Configuration** - Works out of the box with sensible defaults
 
-## Installation
+## Quick Start
 
-### Prerequisites
-- Python 3.8 or higher
-- pip package manager
+### Using Docker (Recommended)
 
-### Install the package
-```bash
-pip install -e .
-```
+The easiest way to use this MCP server is via Docker. Pre-built images are automatically published to GitHub Container Registry and support both `linux/amd64` and `linux/arm64` platforms.
 
-## Usage
+Add this configuration to your MCP settings file (e.g., `~/.vscode-server/data/User/mcp.json` or Claude Desktop config):
 
-### Option 1: Using Docker (Recommended)
-
-The easiest way to use this MCP server is via Docker, which is automatically built and published to GitHub Container Registry.
-
-**Docker with stdio transport:**
 ```json
 {
   "mcpServers": {
@@ -42,55 +38,96 @@ The easiest way to use this MCP server is via Docker, which is automatically bui
 }
 ```
 
-### Option 2: Local Python Installation
+> [!TIP]
+> The Docker approach requires no local Python installation or dependency management. The image is kept minimal (~150MB) for fast downloads.
 
-Add to your MCP configuration file:
+### Using Python (Local Development)
 
-**Linux/Mac (using python3):**
-```json
-{
-  "mcpServers": {
-    "TartuNLP": {
-      "command": "python3",
-      "args": ["-m", "tartunlp_mcp_server"],
-      "env": {}
-    }
-  }
-}
-```
+For local development or if you prefer not to use Docker:
 
-**Windows (using python):**
-```json
-{
-  "mcpServers": {
-    "TartuNLP": {
-      "command": "python",
-      "args": ["-m", "tartunlp_mcp_server"],
-      "env": {}
-    }
-  }
-}
-```
+1. **Install the package:**
+   ```bash
+   pip install -e .
+   ```
 
-### Configuration Notes
-- The Docker approach requires no local Python installation or dependencies
-- Use `python3` on Linux/Mac systems where both Python 2 and 3 are installed
-- Use `python` on Windows or systems where Python 3 is the default
-- Additional configuration options like `disabled` and `autoApprove` can be added as needed
+2. **Add to your MCP configuration:**
+
+   **Linux/Mac:**
+   ```json
+   {
+     "mcpServers": {
+       "TartuNLP": {
+         "command": "python3",
+         "args": ["-m", "tartunlp_mcp_server"]
+       }
+     }
+   }
+   ```
+
+   **Windows:**
+   ```json
+   {
+     "mcpServers": {
+       "TartuNLP": {
+         "command": "python",
+         "args": ["-m", "tartunlp_mcp_server"]
+       }
+     }
+   }
+   ```
+
+> [!NOTE]
+> Requires Python 3.8 or higher. Use `python3` on systems where both Python 2 and 3 are installed.
+
+## Available Tools
+
+Once configured, the MCP server exposes the following tools to AI assistants:
+
+### `translate_text`
+Translate text between any supported language pair.
+
+**Parameters:**
+- `text` (string): The text to translate
+- `source_lang` (string): Source language code (e.g., 'eng', 'est', 'fin')
+- `target_lang` (string): Target language code (e.g., 'eng', 'est', 'fin')
+- `model` (string, optional): Specific translation model/domain to use
+
+### `get_supported_languages`
+Retrieve the complete list of supported language pairs and available translation models.
+
+**Returns:** List of all 700+ available translation pairs with source/target language information.
 
 ## Development
 
-### Building the Docker Image Locally
+### Local Testing
 
 ```bash
-docker build -t tartunlp-mcp .
+# Install dependencies
+pip install -e .
+
+# Run the server locally
+python -m tartunlp_mcp_server
 ```
 
-### Running with Docker
+### Building Docker Images
 
 ```bash
+# Build locally
+docker build -t tartunlp-mcp .
+
+# Test the Docker image
 docker run -i --rm tartunlp-mcp
 ```
+
+### CI/CD
+
+Docker images are automatically built and published to GitHub Container Registry on every push to the `docker-mcp` branch. The workflow:
+
+1. Builds multi-platform images (linux/amd64, linux/arm64)
+2. Tags images with branch name, commit SHA, and `latest`
+3. Publishes to `ghcr.io/tbitu/tartunlp-mcp`
+
+See [`.github/workflows/docker-build-push.yml`](.github/workflows/docker-build-push.yml) for details.
 
 ## Supported Languages
 
