@@ -21,9 +21,30 @@ pip install -e .
 
 ## Usage
 
-Add to your MCP configuration file:
+### Option 1: Using Docker (Recommended)
 
-### Cross-Platform Configuration
+The easiest way to use this MCP server is via Docker, which is automatically built and published to GitHub Container Registry.
+
+**Docker with stdio transport:**
+```json
+{
+  "mcpServers": {
+    "TartuNLP": {
+      "command": "docker",
+      "args": [
+        "run",
+        "-i",
+        "--rm",
+        "ghcr.io/tbitu/tartunlp-mcp:latest"
+      ]
+    }
+  }
+}
+```
+
+### Option 2: Local Python Installation
+
+Add to your MCP configuration file:
 
 **Linux/Mac (using python3):**
 ```json
@@ -52,9 +73,24 @@ Add to your MCP configuration file:
 ```
 
 ### Configuration Notes
+- The Docker approach requires no local Python installation or dependencies
 - Use `python3` on Linux/Mac systems where both Python 2 and 3 are installed
 - Use `python` on Windows or systems where Python 3 is the default
 - Additional configuration options like `disabled` and `autoApprove` can be added as needed
+
+## Development
+
+### Building the Docker Image Locally
+
+```bash
+docker build -t tartunlp-mcp .
+```
+
+### Running with Docker
+
+```bash
+docker run -i --rm tartunlp-mcp
+```
 
 ## Supported Languages
 
