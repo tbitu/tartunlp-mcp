@@ -1,4 +1,10 @@
-runtime: "container"
 build:
   dockerfile: "Dockerfile"
   dockerBuildPath: "."
+runtime: "python"
+startCommand:
+  type: "stdio"
+  command: "python"
+  args:
+    - "-m"
+    - "tartunlp_mcp_server"
