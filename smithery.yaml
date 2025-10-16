@@ -1,1 +1,3 @@
 runtime: "python"
+exampleConfig:
+  timeout: 5000

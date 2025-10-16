@@ -26,10 +26,6 @@ from smithery.decorators import smithery
 # Configuration schema for Smithery MCP
 class ServerConfig(BaseModel):
     """Configuration schema for TartuNLP MCP Server."""
-    api_key: str = Field(
-        description="API key for TartuNLP translation services. The TartuNLP API is public and doesn't require authentication, so you can use any value.",
-        default="public"
-    )
     timeout: int = Field(
         default=5000,
         description="Request timeout in milliseconds",
@@ -52,9 +48,8 @@ class TranslationRequest(BaseModel):
 
 class TartuNLPClient:
     """Client for TartuNLP translation services."""
-    def __init__(self, api_key: str, timeout: int = 5000):
+    def __init__(self, timeout: int = 5000):
         self.base_url = "https://api.tartunlp.ai/translation/v2"
-        self.api_key = api_key
         self.timeout = timeout / 1000.0  # Convert ms to seconds
         
     async def translate(
@@ -217,7 +212,6 @@ def create_server(config: ServerConfig = None):
         config = ServerConfig()
     
     tartunlp_client = TartuNLPClient(
-        api_key=config.api_key,
         timeout=config.timeout
     )
     
@@ -230,7 +224,6 @@ async def main(config: dict = None):
     global tartunlp_client
     validated_config = ServerConfig(**(config or {}))
     tartunlp_client = TartuNLPClient(
-        api_key=validated_config.api_key,
         timeout=validated_config.timeout
     )
     async with stdio_server() as (read_stream, write_stream):
