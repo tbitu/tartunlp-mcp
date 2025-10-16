@@ -208,13 +208,25 @@ async def call_tool(name: str, arguments: dict | None) -> list[TextContent]:
 
 
 @smithery.server(config_schema=ServerConfig)
-def create_server():
+def create_server(config: ServerConfig = None):
     """Create and configure the TartuNLP MCP server."""
+    global tartunlp_client
+    
+    # Initialize with config
+    if config is None:
+        config = ServerConfig()
+    
+    tartunlp_client = TartuNLPClient(
+        api_key=config.api_key,
+        timeout=config.timeout
+    )
+    
     return server
 
 
+# For local stdio testing (optional)
 async def main(config: dict = None):
-    """Main server entry point with config validation."""
+    """Main server entry point with config validation for stdio mode."""
     global tartunlp_client
     validated_config = ServerConfig(**(config or {}))
     tartunlp_client = TartuNLPClient(
