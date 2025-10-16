@@ -22,6 +22,10 @@ from mcp.types import (
 )
 from pydantic import BaseModel
 
+# Configuration schema for Smithery MCP
+class ServerConfig(BaseModel):
+    api_key: str
+    timeout: int = 5000
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -38,10 +42,10 @@ class TranslationRequest(BaseModel):
 
 class TartuNLPClient:
     """Client for TartuNLP translation services."""
-    
-    def __init__(self):
+    def __init__(self, api_key: str, timeout: int = 5000):
         self.base_url = "https://api.tartunlp.ai/translation/v2"
-        self.timeout = 30.0
+        self.api_key = api_key
+        self.timeout = timeout / 1000.0  # Convert ms to seconds
         
     async def translate(
         self, 
@@ -95,8 +99,8 @@ class TartuNLPClient:
                 }
 
 
-# Initialize TartuNLP client
-tartunlp_client = TartuNLPClient()
+# tartunlp_client will be initialized in main() with config
+tartunlp_client = None
 
 # Create MCP server
 server = Server("TartuNLP")
@@ -193,8 +197,14 @@ async def call_tool(name: str, arguments: dict | None) -> list[TextContent]:
         )]
 
 
-async def main():
-    """Main server entry point."""
+async def main(config: dict = None):
+    """Main server entry point with config validation."""
+    global tartunlp_client
+    validated_config = ServerConfig(**(config or {}))
+    tartunlp_client = TartuNLPClient(
+        api_key=validated_config.api_key,
+        timeout=validated_config.timeout
+    )
     async with stdio_server() as (read_stream, write_stream):
         await server.run(
             read_stream,
