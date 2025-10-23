@@ -121,7 +121,7 @@ docker run -i --rm tartunlp-mcp
 
 ### CI/CD
 
-Docker images are automatically built and published to GitHub Container Registry on every push to the `docker-mcp` branch. The workflow:
+Docker images are automatically built and published to GitHub Container Registry on every push to the `main` branch. The workflow:
 
 1. Builds multi-platform images (linux/amd64, linux/arm64)
 2. Tags images with branch name, commit SHA, and `latest`
